@@ -93,7 +93,7 @@ expression
   | expression binaryBoolOp expression # boolExp
   | NOT expression # negationExp
   | '(' expression ')' # parenthesisExp
-  | NamedValue '(' ( expression ( ',' expression )* )? ')' # funcCallExp
+  | NamedValue '(' ( args+=expression ( ',' args+=expression )* )? ')' # funcCallExp
   ;
 
 statement
