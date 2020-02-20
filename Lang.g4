@@ -99,7 +99,7 @@ expression
 statement
   : SKIPKW ';' # skipStmt
   | quantifiedType NamedValue '=' expression ';' # valDeclStmt
-  | dataType NamedValue '(' ( quantifiedType NamedValue ( ',' quantifiedType NamedValue )* )? ')' '{' statement+ '}' # funcDeclStmt
+  | funcRetType=dataType funcName=NamedValue '(' ( funcArgTypes+=quantifiedType funcArgNames+=NamedValue ( ',' funcArgTypes+=quantifiedType funcArgNames+=NamedValue )* )? ')' '{' statement+ '}' # funcDeclStmt
   | NamedValue '=' expression ';' # assignStmt
   | PRINT '(' expression ')' ';' # printStmt
   | IF expression '{' (ifBlock+=statement)+ '}' (ELSE '{' (elseBlock+=statement)+ '}')? # ifElseStmt

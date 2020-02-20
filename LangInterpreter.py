@@ -150,16 +150,15 @@ class LangInterpreter(LangVisitor):
     self.environment[-1][name] = VariableRecord(typeQuantifier, dataType, value.value)
 
   def visitFuncDeclStmt(self, ctx):
-    name = ctx.NamedValue(0).getText()
+    name = ctx.funcName.text
     if name in self.environment[-1]:
       raise Exception('Name redefinition in same namespace ({})'.format(name))
     body = ctx.statement()
-    dataType = DataType.parse(ctx.dataType().getText())
-    quantifiedTypes = ctx.quantifiedType()
-    argNames = [name.getText() for name in ctx.NamedValue()[1:]]
+    dataType = DataType.parse(ctx.funcRetType.getText())
+    quantifiedTypes = ctx.funcArgTypes
+    argNames = [name.text for name in ctx.funcArgNames]
     args = {}
     for argName, quantifiedType in zip(argNames, quantifiedTypes):
-      print(args)
       if argName in args:
         raise Exception('Name redefinition among function arguments ({})'.format(argName))
       argTypeQuantifier = TypeQuantifier.parse(quantifiedType.typeQuantifier().getText())
