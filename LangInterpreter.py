@@ -43,6 +43,9 @@ class FunctionRecord:
     self.args = args
     self.body = body
 
+class FunctionReturnedException(Exception):
+    pass
+
 # interprets the language
 class LangInterpreter(LangVisitor):
 
@@ -209,7 +212,9 @@ class LangInterpreter(LangVisitor):
       self.environment.pop()
 
   def visitReturnStmt(self, ctx):
-    raise Exception('Not implemented!')
+    value = self.visit(ctx.expression())
+    value.typeQuantifier = TypeQuantifier.Const
+    raise FunctionReturnedException(value)
 
   def interpret(self, ctx):
     self.environment = [{}]
