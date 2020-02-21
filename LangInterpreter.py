@@ -52,6 +52,7 @@ class LangInterpreter(LangVisitor):
   def __init__(self):
     self.environment = None
 
+  # search for name in environment, starting from innermost scope
   def getRecordFromName(self, name):
     for scope in self.environment[::-1]:
       if name in scope:
@@ -140,12 +141,17 @@ class LangInterpreter(LangVisitor):
     record = self.getRecordFromName(name)
     if len(record.params) != len(ctx.args):
       raise Exception('Incorrect number of arguments for function {} (expected {} got {})'.format(name,len(record.params),len(ctx.args)))
+    # create empty temporary environment to store arg values
     argsEnvironment = {}
+    # evaluate arguments and store in temporary environment
     for param, arg in zip(record.params, ctx.args):
       argValue = self.visit(arg)
       argsEnvironment[param] = argValue
+    # store current number of environments so that we can restore the same number on return
     currentNumOfEnv = len(self.environment)
+    # push temporary environment to main environment
     self.environment.append(argsEnvironment)
+    # run body and catch return value
     returnValue = None
     try:
       for statement in record.body:
@@ -156,6 +162,7 @@ class LangInterpreter(LangVisitor):
       raise Exception('Function {} did not return a value'.format(name))
     if returnValue.dataType != record.dataType:
       raise Exception('Type mismatch in return value of function {} (expected {} got {})'.format(name,record.dataType.name,returnValue.dataType.name))
+    # restore environment stack to correct state
     self.environment = self.environment[:currentNumOfEnv]
     return returnValue
 
@@ -235,6 +242,7 @@ class LangInterpreter(LangVisitor):
   def visitReturnStmt(self, ctx):
     value = self.visit(ctx.expression())
     value.typeQuantifier = TypeQuantifier.Const
+    # throw exception with return value, which will be caught by function call interpreter
     raise FunctionReturnedException(value)
 
   def interpret(self, ctx):
