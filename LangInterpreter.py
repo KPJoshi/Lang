@@ -72,7 +72,8 @@ class LangInterpreter(LangVisitor):
   def visitArithExp(self, ctx):
     value0 = self.visit(ctx.expression(0))
     value1 = self.visit(ctx.expression(1))
-    assert(value0.dataType == value1.dataType and value0.dataType == DataType.Float)
+    if value0.dataType != DataType.Float or value1.dataType != DataType.Float:
+      raise Exception('Arithmetic on non-numerical values')
     op = ctx.arithOp().getText()
     resultValue = 0.0
     if op == '+':
@@ -94,7 +95,8 @@ class LangInterpreter(LangVisitor):
   def visitComparisonExp(self, ctx):
     value0 = self.visit(ctx.expression(0))
     value1 = self.visit(ctx.expression(1))
-    assert(value0.dataType == value1.dataType)
+    if value0.dataType != value1.dataType:
+      raise Exception('Comparison of values of different types')
     op = ctx.compOp().getText()
     resultValue = None
     if op == '==':
@@ -116,7 +118,8 @@ class LangInterpreter(LangVisitor):
   def visitBoolExp(self, ctx):
     value0 = self.visit(ctx.expression(0))
     value1 = self.visit(ctx.expression(1))
-    assert(value0.dataType == value1.dataType and value0.dataType == DataType.Bool)
+    if value0.dataType != DataType.Bool or value1.dataType != DataType.Bool:
+      raise Exception('Logic on non-boolean values')
     op = ctx.binaryBoolOp().getText()
     resultValue = None
     if op == 'and':
@@ -129,7 +132,8 @@ class LangInterpreter(LangVisitor):
 
   def visitNegationExp(self, ctx):
     value = self.visit(ctx.expression())
-    assert(value.dataType == DataType.Bool)
+    if value.dataType != DataType.Bool:
+      raise Exception('Logic on non-boolean values')
     value.value = (not value.value)
     return value
 
