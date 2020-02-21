@@ -38,9 +38,9 @@ class VariableRecord:
 
 # stores function return type, arguments, and body
 class FunctionRecord:
-  def __init__(self, dataType, args, body):
+  def __init__(self, dataType, params, body):
     self.dataType = dataType
-    self.args = args
+    self.params = params
     self.body = body
 
 class FunctionReturnedException(Exception):
@@ -52,7 +52,7 @@ class LangInterpreter(LangVisitor):
   def __init__(self):
     self.environment = None
 
-  def getVariableRecordFromName(self, name):
+  def getRecordFromName(self, name):
     for scope in self.environment[::-1]:
       if name in scope:
         return scope[name]
@@ -66,7 +66,7 @@ class LangInterpreter(LangVisitor):
 
   def visitNamedValueExp(self, ctx):
     name = ctx.NamedValue().getText()
-    return self.getVariableRecordFromName(name)
+    return self.getRecordFromName(name)
 
   def visitArithExp(self, ctx):
     value0 = self.visit(ctx.expression(0))
@@ -87,7 +87,7 @@ class LangInterpreter(LangVisitor):
     elif op == '^':
       resultValue = value0.value ** value1.value
     else:
-      raise ValueError('Invalid arithmetic operand ({})'.format(op))
+      raise Exception('Invalid arithmetic operand ({})'.format(op))
     return VariableRecord(TypeQuantifier.Const, DataType.Float, resultValue)
 
   def visitComparisonExp(self, ctx):
@@ -109,7 +109,7 @@ class LangInterpreter(LangVisitor):
     elif op == '>':
       resultValue = ( value0.value > value1.value )
     else:
-      raise ValueError('Invalid comparison operand ({})'.format(op))
+      raise Exception('Invalid comparison operand ({})'.format(op))
     return VariableRecord(TypeQuantifier.Const, DataType.Bool, resultValue)
 
   def visitBoolExp(self, ctx):
@@ -123,7 +123,7 @@ class LangInterpreter(LangVisitor):
     elif op == 'or':
       resultValue = ( value0.value or value1.value )
     else:
-      raise ValueError('Invalid boolean operand ({})'.format(op))
+      raise Exception('Invalid boolean operand ({})'.format(op))
     return VariableRecord(TypeQuantifier.Const, DataType.Bool, resultValue)
 
   def visitNegationExp(self, ctx):
@@ -136,7 +136,26 @@ class LangInterpreter(LangVisitor):
     return self.visit(ctx.expression())
 
   def visitFuncCallExp(self, ctx):
-    raise Exception('Not implemented!')
+    name = ctx.NamedValue().getText()
+    record = self.getRecordFromName(name)
+    argsEnvironment = {}
+    for param, arg in zip(record.params, ctx.args):
+      argValue = self.visit(arg)
+      argsEnvironment[param] = argValue
+    currentNumOfEnv = len(self.environment)
+    self.environment.append(argsEnvironment)
+    returnValue = None
+    try:
+      for statement in record.body:
+        self.visit(statement)
+    except FunctionReturnedException as returnException:
+      returnValue = returnException.args[0]
+    else:
+      raise Exception('Function {} did not return a value'.format(name))
+    if returnValue.dataType != record.dataType:
+      raise Exception('Type mismatch in return value of function {} (expected {} got {})'.format(name,record.dataType.name,returnValue.dataType.name))
+    self.environment = self.environment[:currentNumOfEnv]
+    return returnValue
 
   def visitSkipStmt(self, ctx):
     pass
@@ -171,7 +190,7 @@ class LangInterpreter(LangVisitor):
 
   def visitAssignStmt(self, ctx):
     name = ctx.NamedValue().getText()
-    record = self.getVariableRecordFromName(name)
+    record = self.getRecordFromName(name)
     if TypeQuantifier.Var != record.typeQuantifier:
       raise Exception('Assignment to constant')
     value = self.visit(ctx.expression())
