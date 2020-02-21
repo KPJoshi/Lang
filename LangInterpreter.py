@@ -138,6 +138,8 @@ class LangInterpreter(LangVisitor):
   def visitFuncCallExp(self, ctx):
     name = ctx.NamedValue().getText()
     record = self.getRecordFromName(name)
+    if len(record.params) != len(ctx.args):
+      raise Exception('Incorrect number of arguments for function {} (expected {} got {})'.format(name,len(record.params),len(ctx.args)))
     argsEnvironment = {}
     for param, arg in zip(record.params, ctx.args):
       argValue = self.visit(arg)
