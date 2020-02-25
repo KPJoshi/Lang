@@ -3,6 +3,7 @@
 from enum import Enum
 import sys
 from antlr4 import CommonTokenStream, InputStream
+from antlr4.tree.Trees import Trees
 from LangLexer import LangLexer
 from LangParser import LangParser
 from LangVisitor import LangVisitor
@@ -267,6 +268,7 @@ if __name__ == '__main__':
   tokenStream = CommonTokenStream(lexer)
   parser = LangParser(tokenStream)
   program = parser.program()
+  # print(Trees.toStringTree(program, None, parser))
 
   # interpret
   interpreter = LangInterpreter()
