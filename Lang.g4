@@ -111,9 +111,10 @@ expression
   | boolLit # boolLiteralExp
   | NamedValue # namedValueExp
   | expression arithOp expression # arithExp
+  | SUBTRACTION expression # minusExp
   | expression compOp expression # comparisonExp
   | expression binaryBoolOp expression # boolExp
-  | NOT expression # negationExp
+  | NOT expression # notExp
   | LPAREN expression RPAREN # parenthesisExp
   | NamedValue LPAREN ( args+=expression ( COMMA args+=expression )* )? RPAREN # funcCallExp
   ;

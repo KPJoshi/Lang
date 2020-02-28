@@ -96,6 +96,13 @@ class LangInterpreter(LangVisitor):
       raise Exception('Invalid arithmetic operand ({})'.format(op))
     return VariableRecord(TypeQuantifier.Const, DataType.Float, resultValue)
 
+  def visitMinusExp(self, ctx):
+    value = self.visit(ctx.expression())
+    if value.dataType != DataType.Float:
+      raise Exception('Arithmetic on non-numerical values')
+    value.value = -value.value
+    return value
+
   def visitComparisonExp(self, ctx):
     value0 = self.visit(ctx.expression(0))
     value1 = self.visit(ctx.expression(1))
@@ -134,7 +141,7 @@ class LangInterpreter(LangVisitor):
       raise Exception('Invalid boolean operand ({})'.format(op))
     return VariableRecord(TypeQuantifier.Const, DataType.Bool, resultValue)
 
-  def visitNegationExp(self, ctx):
+  def visitNotExp(self, ctx):
     value = self.visit(ctx.expression())
     if value.dataType != DataType.Bool:
       raise Exception('Logic on non-boolean values')
