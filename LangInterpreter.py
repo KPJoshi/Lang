@@ -68,7 +68,9 @@ class LangInterpreter(LangVisitor):
 
   def visitNamedValueExp(self, ctx):
     name = ctx.NamedValue().getText()
-    return self.getRecordFromName(name)
+    record = self.getRecordFromName(name).copy()
+    record.typeQuantifier = TypeQuantifier.Const
+    return record
 
   def visitArithExp(self, ctx):
     value0 = self.visit(ctx.expression(0))
@@ -169,6 +171,7 @@ class LangInterpreter(LangVisitor):
       raise Exception('Type mismatch in return value of function {} (expected {} got {})'.format(name,record.dataType.name,returnValue.dataType.name))
     # restore environment stack to correct state
     self.environment = self.environment[:currentNumOfEnv]
+    returnValue.typeQuantifier = TypeQuantifier.Const
     return returnValue
 
   def visitSkipStmt(self, ctx):
