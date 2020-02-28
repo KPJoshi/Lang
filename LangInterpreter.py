@@ -1,5 +1,6 @@
 #! /usr/bin/env python3
 
+import copy
 from enum import Enum
 import sys
 from antlr4 import CommonTokenStream, InputStream
@@ -68,7 +69,7 @@ class LangInterpreter(LangVisitor):
 
   def visitNamedValueExp(self, ctx):
     name = ctx.NamedValue().getText()
-    record = self.getRecordFromName(name).copy()
+    record = copy.copy(self.getRecordFromName(name))
     record.typeQuantifier = TypeQuantifier.Const
     return record
 
