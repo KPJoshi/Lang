@@ -43,6 +43,7 @@ IF : 'if' ;
 ELSE : 'else' ;
 WHILE : 'while' ;
 RETURN : 'return' ;
+INPUT : 'input' ;
 
 // literal
 
@@ -117,6 +118,7 @@ expression
   | NOT expression # notExp
   | LPAREN expression RPAREN # parenthesisExp
   | NamedValue LPAREN ( args+=expression ( COMMA args+=expression )* )? RPAREN # funcCallExp
+  | INPUT LPAREN dataType RPAREN # inputExp
   ;
 
 statement

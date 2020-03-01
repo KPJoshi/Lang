@@ -19,6 +19,8 @@ class TypeQuantifier(Enum):
       return TypeQuantifier.Const
     elif str=='var':
       return TypeQuantifier.Var
+    else:
+      raise Exception('Invalid type quantifier {}'.format(str))
 
 # data types
 class DataType(Enum):
@@ -30,6 +32,8 @@ class DataType(Enum):
       return DataType.Float
     elif str=='bool':
       return DataType.Bool
+    else:
+      raise Exception('Invalid type {}'.format(str))
 
 # stores variable quantifier, type, and value
 class VariableRecord:
@@ -181,6 +185,16 @@ class LangInterpreter(LangVisitor):
     self.environment = self.environment[:currentNumOfEnv]
     returnValue.typeQuantifier = TypeQuantifier.Const
     return returnValue
+
+  def visitInputExp(self, ctx):
+    dataType = DataType.parse(ctx.dataType().getText())
+    rawValue = input()
+    value = None
+    if dataType == dataType.Float:
+      value = float(rawValue)
+    else:
+      value = distutils.util.strtobool(rawValue)
+    return VariableRecord(TypeQuantifier.Const, dataType, value)
 
   def visitSkipStmt(self, ctx):
     pass
