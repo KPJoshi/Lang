@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 
 import copy
+import distutils.util
 from enum import Enum
 import sys
 from antlr4 import CommonTokenStream, InputStream
@@ -193,7 +194,7 @@ class LangInterpreter(LangVisitor):
     if dataType == dataType.Float:
       value = float(rawValue)
     else:
-      value = distutils.util.strtobool(rawValue)
+      value = bool(distutils.util.strtobool(rawValue))
     return VariableRecord(TypeQuantifier.Const, dataType, value)
 
   def visitSkipStmt(self, ctx):
@@ -234,7 +235,7 @@ class LangInterpreter(LangVisitor):
       raise Exception('Assignment to constant')
     value = self.visit(ctx.expression())
     if value.dataType != record.dataType:
-      raise Exception('Type mismatch in assignment (assigning {} to {})'.format(value.dataType.name,dataType.name))
+      raise Exception('Type mismatch in assignment (assigning {} to {})'.format(value.dataType.name,record.dataType.name))
     record.value = value.value
 
   def visitPrintStmt(self, ctx):
